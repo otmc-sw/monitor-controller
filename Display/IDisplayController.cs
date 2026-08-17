@@ -12,10 +12,25 @@ public interface IDisplayController : IDisposable
     Task<byte?> GetContrastAsync(IntPtr monitorHandle);
 }
 
-public record PhysicalMonitorInfo(
+public sealed record PhysicalMonitorInfo(
     IntPtr Handle,
     string Description,
-    HMonitor HMonitor
-);
+    HMonitor HMonitor)
+{
+    /// <summary>
+    /// Stable identifier for persisting monitor selection across sessions.
+    /// Uses the description plus an ordinal when descriptions are duplicated.
+    /// </summary>
+    public string Id { get; init; } = "";
 
-public record HMonitor(IntPtr Handle);
+    /// <summary>
+    /// Friendly display name shown in the UI.
+    /// </summary>
+    public string DisplayName => string.IsNullOrEmpty(Id)
+        ? Description
+        : $"{Description} ({Id})";
+
+    public override string ToString() => DisplayName;
+}
+
+public sealed record HMonitor(IntPtr Handle);

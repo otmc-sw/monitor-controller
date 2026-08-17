@@ -5,11 +5,11 @@ namespace monitor_controller.Display;
 public sealed class DdcController : IDisplayController
 {
     private const string DllName = "dxva2.dll";
-    
+
     // VCP codes
     private const byte VCP_BRIGHTNESS = 0x10;
     private const byte VCP_CONTRAST = 0x12;
-    
+
     private bool _disposed;
     private string? _errorMessage;
     private readonly List<PHYSICAL_MONITOR> _physicalMonitors = new();
@@ -83,8 +83,10 @@ public sealed class DdcController : IDisplayController
     {
         return await Task.Run(() =>
         {
+            // Release previously acquired handles before re-enumerating
+            ReleaseMonitors();
+
             var monitors = new List<PhysicalMonitorInfo>();
-            _physicalMonitors.Clear();
 
             bool callback(IntPtr hMonitor, IntPtr hdcMonitor, IntPtr lprcMonitor, IntPtr dwData)
             {
@@ -106,7 +108,10 @@ public sealed class DdcController : IDisplayController
                     monitors.Add(new PhysicalMonitorInfo(
                         physMonitor.hPhysicalMonitor,
                         physMonitor.szPhysicalMonitorDescription,
-                        new HMonitor(hMonitor)));
+                        new HMonitor(hMonitor))
+                    {
+                        Id = physMonitor.hPhysicalMonitor.ToString()
+                    });
                 }
 
                 return true;
@@ -171,7 +176,7 @@ public sealed class DdcController : IDisplayController
 
     private async Task<byte?> GetVcpValueAsync(IntPtr monitorHandle, byte vcpCode)
     {
-        return await Task.Run(() =>
+        return await Task.Run<byte?>(() =>
         {
             try
             {
@@ -197,23 +202,41 @@ public sealed class DdcController : IDisplayController
         });
     }
 
+    private void ReleaseMonitors()
+    {
+        if (_physicalMonitors.Count > 0)
+        {
+            try
+            {
+                DestroyPhysicalMonitors(
+                    (uint)_physicalMonitors.Count,
+                    _physicalMonitors.ToArray());
+            }
+            catch
+            {
+                // Fall back to individual destruction
+                foreach (var monitor in _physicalMonitors)
+                {
+                    try
+                    {
+                        DestroyPhysicalMonitor(monitor.hPhysicalMonitor);
+                    }
+                    catch
+                    {
+                        // Ignore individual disposal errors
+                    }
+                }
+            }
+
+            _physicalMonitors.Clear();
+        }
+    }
+
     public void Dispose()
     {
         if (_disposed) return;
 
-        foreach (var monitor in _physicalMonitors)
-        {
-            try
-            {
-                DestroyPhysicalMonitor(monitor.hPhysicalMonitor);
-            }
-            catch
-            {
-                // Ignore disposal errors
-            }
-        }
-
-        _physicalMonitors.Clear();
+        ReleaseMonitors();
         _disposed = true;
     }
 }

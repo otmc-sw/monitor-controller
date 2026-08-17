@@ -1,5 +1,4 @@
 using monitor_controller.Display;
-using monitor_controller.Scheduling;
 
 namespace monitor_controller.Scheduling;
 
@@ -32,27 +31,35 @@ public sealed class DisplayScheduler : IDisposable
         _selectedMonitorHandle = handle;
     }
 
+    /// <summary>
+    /// Determines the active profile for the current local time.
+    /// The active profile is the most recent profile whose time is <= now.
+    /// Wraps around midnight: before the first profile time, the last profile of the day remains active.
+    /// </summary>
     public DisplayProfile? GetActiveProfile(List<DisplayProfile> profiles)
     {
         if (profiles.Count == 0) return null;
 
         var now = TimeOnly.FromDateTime(DateTime.Now);
-        DisplayProfile? activeProfile = null;
-        TimeOnly latestTime = default;
 
-        foreach (var profile in profiles)
+        // Sort by time to ensure deterministic ordering
+        var ordered = profiles.OrderBy(p => p.TimeOnly).ToArray();
+
+        // Find the most recent profile with time <= now
+        DisplayProfile? activeProfile = null;
+        foreach (var profile in ordered)
         {
-            if (profile.TimeOnly <= now && profile.TimeOnly > latestTime)
+            if (profile.TimeOnly <= now)
             {
-                latestTime = profile.TimeOnly;
                 activeProfile = profile;
             }
         }
 
-        // If no profile found for today (before first profile), use the last profile from yesterday
-        if (activeProfile == null && profiles.Count > 0)
+        // If no profile has triggered yet today (now is before the earliest profile),
+        // wrap around to the last profile of the day (e.g. 23:00 remains active until 06:00).
+        if (activeProfile == null)
         {
-            activeProfile = profiles.OrderByDescending(p => p.TimeOnly).First();
+            activeProfile = ordered[^1];
         }
 
         return activeProfile;
@@ -109,27 +116,13 @@ public sealed class DisplayScheduler : IDisposable
             var activeProfile = GetActiveProfile(profiles);
             if (activeProfile == null) return;
 
-            // Only apply if profile changed
-            if (_lastAppliedProfile != null &&
-                _lastAppliedProfile.Time == activeProfile.Time &&
-                _lastAppliedProfile.Brightness == activeProfile.Brightness &&
-                _lastAppliedProfile.Contrast == activeProfile.Contrast)
+            // Only apply if the profile has actually changed
+            if (_lastAppliedProfile != null && ProfilesEqual(_lastAppliedProfile, activeProfile))
             {
                 return;
             }
 
-            bool brightnessSet = await _displayController.SetBrightnessAsync(_selectedMonitorHandle, activeProfile.Brightness);
-            bool contrastSet = await _displayController.SetContrastAsync(_selectedMonitorHandle, activeProfile.Contrast);
-
-            if (brightnessSet && contrastSet)
-            {
-                _lastAppliedProfile = activeProfile;
-                ProfileChanged?.Invoke(this, activeProfile);
-            }
-            else
-            {
-                ErrorOccurred?.Invoke(this, $"Failed to apply profile: {_displayController.ErrorMessage}");
-            }
+            await ApplyProfileAsync(activeProfile);
         }
         catch (Exception ex)
         {
@@ -170,6 +163,13 @@ public sealed class DisplayScheduler : IDisposable
         {
             ErrorOccurred?.Invoke(this, $"Error applying profile: {ex.Message}");
         }
+    }
+
+    private static bool ProfilesEqual(DisplayProfile a, DisplayProfile b)
+    {
+        return a.Time == b.Time &&
+               a.Brightness == b.Brightness &&
+               a.Contrast == b.Contrast;
     }
 
     public void Dispose()

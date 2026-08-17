@@ -61,11 +61,10 @@ public sealed class ConfigService
         }
     }
 
-    private static async Task<AppConfig> SaveDefaultAsync()
+    private async Task<AppConfig> SaveDefaultAsync()
     {
         var defaultConfig = AppConfig.Default;
-        var service = new ConfigService();
-        await service.SaveAsync(defaultConfig);
+        await SaveAsync(defaultConfig);
         return defaultConfig;
     }
 }

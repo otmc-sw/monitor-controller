@@ -10,9 +10,11 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly IDisplayController _displayController;
     private readonly DisplayScheduler _scheduler;
     private readonly ConfigService _configService;
-    private AppConfig _config;
+    private AppConfig _config = AppConfig.Default;
     private DisplayProfile? _currentProfile;
     private PhysicalMonitorInfo[] _monitors = Array.Empty<PhysicalMonitorInfo>();
+    private ToolStripMenuItem? _profileMenuItem;
+    private ToolStripMenuItem? _enableMenuItem;
 
     public TrayApplicationContext(
         IDisplayController displayController,
@@ -39,31 +41,82 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private async void InitializeAsync()
     {
-        _config = await _configService.LoadAsync();
-        _monitors = await _displayController.EnumerateMonitorsAsync();
+        try
+        {
+            _config = await _configService.LoadAsync();
+            _monitors = await _displayController.EnumerateMonitorsAsync();
 
-        // Select monitor from config or first available
-        IntPtr selectedHandle = IntPtr.Zero;
+            if (_monitors.Length == 0)
+            {
+                _notifyIcon.ShowBalloonTip(
+                    5000,
+                    "MonitorController",
+                    "No physical monitors detected. DDC/CI may be unavailable.",
+                    ToolTipIcon.Warning);
+            }
+            else if (!_displayController.IsAvailable)
+            {
+                _notifyIcon.ShowBalloonTip(
+                    5000,
+                    "MonitorController Error",
+                    _displayController.ErrorMessage ?? "DDC/CI is unavailable.",
+                    ToolTipIcon.Error);
+            }
+
+            IntPtr selectedHandle = SelectMonitorHandle();
+            _scheduler.SetSelectedMonitor(selectedHandle);
+
+            if (selectedHandle == IntPtr.Zero && _monitors.Length > 0)
+            {
+                _notifyIcon.ShowBalloonTip(
+                    5000,
+                    "MonitorController",
+                    "No monitor selected. Open Settings to choose a monitor.",
+                    ToolTipIcon.Warning);
+            }
+
+            await _scheduler.StartAsync(_config.Profiles);
+            BuildContextMenu();
+        }
+        catch (Exception ex)
+        {
+            _notifyIcon.ShowBalloonTip(
+                5000,
+                "MonitorController Error",
+                $"Failed to initialize: {ex.Message}",
+                ToolTipIcon.Error);
+
+            BuildContextMenu();
+        }
+    }
+
+    private IntPtr SelectMonitorHandle()
+    {
+        if (_monitors.Length == 0) return IntPtr.Zero;
+
+        // Try to restore the saved monitor by handle
         if (!string.IsNullOrEmpty(_config.SelectedMonitorHandle))
         {
-            var handle = new IntPtr(long.Parse(_config.SelectedMonitorHandle));
-            if (_monitors.Any(m => m.Handle == handle))
+            try
             {
-                selectedHandle = handle;
+                var savedHandle = new IntPtr(long.Parse(_config.SelectedMonitorHandle));
+                var match = _monitors.FirstOrDefault(m => m.Handle == savedHandle);
+                if (match != null)
+                {
+                    return match.Handle;
+                }
+            }
+            catch
+            {
+                // Ignore parse errors and fall through to first monitor
             }
         }
 
-        if (selectedHandle == IntPtr.Zero && _monitors.Length > 0)
-        {
-            selectedHandle = _monitors[0].Handle;
-            _config = _config with { SelectedMonitorHandle = selectedHandle.ToString() };
-            await _configService.SaveAsync(_config);
-        }
-
-        _scheduler.SetSelectedMonitor(selectedHandle);
-        await _scheduler.StartAsync(_config.Profiles);
-
-        BuildContextMenu();
+        // Default to the first monitor
+        var first = _monitors[0];
+        _config = _config with { SelectedMonitorHandle = first.Handle.ToString() };
+        _ = _configService.SaveAsync(_config);
+        return first.Handle;
     }
 
     private void BuildContextMenu()
@@ -71,24 +124,34 @@ public sealed class TrayApplicationContext : ApplicationContext
         var contextMenu = new ContextMenuStrip();
 
         // Current Profile
-        var profileItem = new ToolStripMenuItem(
-            $"Current Profile: {_currentProfile?.Time ?? "None"} ({_currentProfile?.Brightness ?? 0}/{_currentProfile?.Contrast ?? 0})")
+        _profileMenuItem = new ToolStripMenuItem(
+            $"Current Profile: {_currentProfile?.Time ?? "None"} (B:{_currentProfile?.Brightness ?? 0} C:{_currentProfile?.Contrast ?? 0})")
         {
             Enabled = false
         };
-        contextMenu.Items.Add(profileItem);
+        contextMenu.Items.Add(_profileMenuItem);
+
+        // Monitor info
+        var monitorText = _monitors.Length == 0
+            ? "Monitor: Not Detected"
+            : $"Monitor: {_monitors[0].Description}";
+        if (_monitors.Length > 1)
+        {
+            monitorText += $" (+{_monitors.Length - 1} more)";
+        }
+        contextMenu.Items.Add(new ToolStripMenuItem(monitorText) { Enabled = false });
 
         contextMenu.Items.Add(new ToolStripSeparator());
 
         // Enable/Disable
-        var enableItem = new ToolStripMenuItem(
+        _enableMenuItem = new ToolStripMenuItem(
             _scheduler.Enabled ? "Disable" : "Enable",
-            null, async (s, e) =>
+            null, (s, e) =>
             {
                 _scheduler.Enabled = !_scheduler.Enabled;
-                ((ToolStripMenuItem)s!).Text = _scheduler.Enabled ? "Disable" : "Enable";
+                RefreshEnableMenuItem();
             });
-        contextMenu.Items.Add(enableItem);
+        contextMenu.Items.Add(_enableMenuItem);
 
         // Settings
         contextMenu.Items.Add("Settings", null, (s, e) => OpenSettings());
@@ -101,6 +164,14 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 await _scheduler.ApplyProfileAsync(activeProfile);
             }
+            else
+            {
+                _notifyIcon.ShowBalloonTip(
+                    3000,
+                    "MonitorController",
+                    "No profiles configured. Open Settings to add one.",
+                    ToolTipIcon.Info);
+            }
         });
 
         contextMenu.Items.Add(new ToolStripSeparator());
@@ -111,6 +182,24 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon.ContextMenuStrip = contextMenu;
     }
 
+    private void RefreshEnableMenuItem()
+    {
+        if (_enableMenuItem != null)
+        {
+            _enableMenuItem.Text = _scheduler.Enabled ? "Disable" : "Enable";
+        }
+    }
+
+    private void RefreshProfileMenuItem()
+    {
+        if (_profileMenuItem != null)
+        {
+            _profileMenuItem.Text = _currentProfile == null
+                ? "Current Profile: None"
+                : $"Current Profile: {_currentProfile.Time} (B:{_currentProfile.Brightness} C:{_currentProfile.Contrast})";
+        }
+    }
+
     private void OnDoubleClick(object? sender, EventArgs e)
     {
         OpenSettings();
@@ -119,7 +208,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private void OnProfileChanged(object? sender, DisplayProfile? profile)
     {
         _currentProfile = profile;
-        BuildContextMenu();
+        RefreshProfileMenuItem();
     }
 
     private void OnErrorOccurred(object? sender, string error)
@@ -145,6 +234,13 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _config = await _configService.LoadAsync();
             _monitors = await _displayController.EnumerateMonitorsAsync();
+
+            // Re-select the monitor after settings changes
+            _scheduler.SetSelectedMonitor(SelectMonitorHandle());
+
+            // Restart scheduler to pick up any profile changes
+            await _scheduler.StartAsync(_config.Profiles);
+
             BuildContextMenu();
         };
 

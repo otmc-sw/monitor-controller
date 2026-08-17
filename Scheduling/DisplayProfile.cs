@@ -1,10 +1,20 @@
 namespace monitor_controller.Scheduling;
 
-public record DisplayProfile(
+public sealed record DisplayProfile(
     string Time,
     byte Brightness,
-    byte Contrast
-)
+    byte Contrast)
 {
-    public TimeOnly TimeOnly { get; } = TimeOnly.Parse(Time);
+    private TimeOnly? _timeOnly;
+
+    public TimeOnly TimeOnly
+    {
+        get
+        {
+            _timeOnly ??= TimeOnly.TryParse(Time, out var parsed)
+                ? parsed
+                : TimeOnly.MinValue;
+            return _timeOnly.Value;
+        }
+    }
 }
