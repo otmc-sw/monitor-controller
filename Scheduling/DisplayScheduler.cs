@@ -7,8 +7,10 @@ public sealed class DisplayScheduler : IDisposable
     private readonly IDisplayController _displayController;
     private readonly PeriodicTimer _timer;
     private CancellationTokenSource? _cancellationTokenSource;
+    private Task? _backgroundTask;
     private DisplayProfile? _lastAppliedProfile;
     private bool _enabled = true;
+    private bool _disposed;
     private IntPtr _selectedMonitorHandle = IntPtr.Zero;
 
     public event EventHandler<DisplayProfile?>? ProfileChanged;
@@ -28,7 +30,12 @@ public sealed class DisplayScheduler : IDisposable
 
     public void SetSelectedMonitor(IntPtr handle)
     {
-        _selectedMonitorHandle = handle;
+        if (_selectedMonitorHandle != handle)
+        {
+            _selectedMonitorHandle = handle;
+            // Force re-apply on next check so the profile is applied to the new monitor
+            _lastAppliedProfile = null;
+        }
     }
 
     /// <summary>
@@ -78,14 +85,25 @@ public sealed class DisplayScheduler : IDisposable
         // Apply current profile immediately on startup
         await ApplyCurrentProfileAsync(profiles);
 
-        _ = Task.Run(async () =>
+        _backgroundTask = Task.Run(async () =>
         {
-            while (await _timer.WaitForNextTickAsync(token))
+            try
             {
-                if (_enabled)
+                while (await _timer.WaitForNextTickAsync(token))
                 {
-                    await ApplyCurrentProfileAsync(profiles);
+                    if (_enabled)
+                    {
+                        await ApplyCurrentProfileAsync(profiles);
+                    }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // Normal shutdown
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke(this, $"Scheduler error: {ex.Message}");
             }
         }, token);
     }
@@ -93,8 +111,22 @@ public sealed class DisplayScheduler : IDisposable
     public async Task StopAsync()
     {
         _cancellationTokenSource?.Cancel();
+
+        if (_backgroundTask != null)
+        {
+            try
+            {
+                await _backgroundTask;
+            }
+            catch (OperationCanceledException)
+            {
+                // Normal shutdown
+            }
+        }
+
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
+        _backgroundTask = null;
     }
 
     private async Task ApplyCurrentProfileAsync(List<DisplayProfile> profiles)
@@ -174,6 +206,9 @@ public sealed class DisplayScheduler : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+
+        _disposed = true;
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
         _timer.Dispose();

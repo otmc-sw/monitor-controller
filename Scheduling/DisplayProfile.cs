@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace monitor_controller.Scheduling;
 
 public sealed record DisplayProfile(
@@ -7,6 +9,7 @@ public sealed record DisplayProfile(
 {
     private TimeOnly? _timeOnly;
 
+    [JsonIgnore]
     public TimeOnly TimeOnly
     {
         get

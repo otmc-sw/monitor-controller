@@ -250,8 +250,6 @@ public sealed class TrayApplicationContext : ApplicationContext
     private void ExitApplication()
     {
         _notifyIcon.Visible = false;
-        _scheduler.Dispose();
-        _displayController.Dispose();
         Application.Exit();
     }
 

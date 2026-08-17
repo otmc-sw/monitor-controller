@@ -82,27 +82,27 @@ public sealed class SettingsForm : Form
         _monitorComboBox = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
         layout.Controls.Add(_monitorComboBox, 1, 0);
 
-        // Profiles
+        // Profiles label
         layout.Controls.Add(new Label { Text = "Profiles:", Anchor = AnchorStyles.Left }, 0, 1);
+
+        // Profile list (expands to fill available space)
         _profileList = new ListBox { Dock = DockStyle.Fill, IntegralHeight = false };
-        layout.Controls.Add(_profileList, 1, 1);
-        layout.SetColumnSpan(_profileList, 1);
-        layout.SetRowSpan(_profileList, 1);
+        layout.Controls.Add(_profileList, 1, 2);
 
         // Time
-        layout.Controls.Add(new Label { Text = "Time (HH:mm):", Anchor = AnchorStyles.Left }, 0, 2);
+        layout.Controls.Add(new Label { Text = "Time (HH:mm):", Anchor = AnchorStyles.Left }, 0, 3);
         _timeTextBox = new TextBox { Dock = DockStyle.Fill, Text = "08:00" };
-        layout.Controls.Add(_timeTextBox, 1, 2);
+        layout.Controls.Add(_timeTextBox, 1, 3);
 
         // Brightness
-        layout.Controls.Add(new Label { Text = "Brightness (0-100):", Anchor = AnchorStyles.Left }, 0, 3);
+        layout.Controls.Add(new Label { Text = "Brightness (0-100):", Anchor = AnchorStyles.Left }, 0, 4);
         _brightnessNumeric = new NumericUpDown { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100, Value = 50 };
-        layout.Controls.Add(_brightnessNumeric, 1, 3);
+        layout.Controls.Add(_brightnessNumeric, 1, 4);
 
         // Contrast
-        layout.Controls.Add(new Label { Text = "Contrast (0-100):", Anchor = AnchorStyles.Left }, 0, 4);
+        layout.Controls.Add(new Label { Text = "Contrast (0-100):", Anchor = AnchorStyles.Left }, 0, 5);
         _contrastNumeric = new NumericUpDown { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100, Value = 50 };
-        layout.Controls.Add(_contrastNumeric, 1, 4);
+        layout.Controls.Add(_contrastNumeric, 1, 5);
 
         // Buttons row
         var buttonsPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true };
@@ -111,10 +111,10 @@ public sealed class SettingsForm : Form
         _deleteButton = new Button { Text = "Delete", Width = 80 };
         _applyButton = new Button { Text = "Apply", Width = 80 };
         buttonsPanel.Controls.AddRange(new Control[] { _addButton, _editButton, _deleteButton, _applyButton });
-        layout.Controls.Add(buttonsPanel, 1, 5);
+        layout.Controls.Add(buttonsPanel, 1, 6);
 
         // Manual test section
-        layout.Controls.Add(new Label { Text = "Manual Test (DDC/CI):", Anchor = AnchorStyles.Left }, 0, 6);
+        layout.Controls.Add(new Label { Text = "Manual Test (DDC/CI):", Anchor = AnchorStyles.Left }, 0, 7);
 
         var testPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true };
         _setBrightness50Button = new Button { Text = "Set Brightness 50", Width = 130 };
@@ -126,26 +126,36 @@ public sealed class SettingsForm : Form
             _setContrast50Button,
             readValuesButton
         });
-        layout.Controls.Add(testPanel, 1, 6);
+        layout.Controls.Add(testPanel, 1, 7);
         layout.SetColumnSpan(testPanel, 1);
 
         // Read results
-        layout.Controls.Add(new Label { Text = "Current monitor values:", Anchor = AnchorStyles.Left }, 0, 7);
+        layout.Controls.Add(new Label { Text = "Current monitor values:", Anchor = AnchorStyles.Left }, 0, 8);
         var readPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true };
         _readBrightnessLabel = new Label { Text = "Brightness: --", AutoSize = true, Margin = new Padding(0, 0, 20, 0) };
         _readContrastLabel = new Label { Text = "Contrast: --", AutoSize = true };
         readPanel.Controls.AddRange(new Control[] { _readBrightnessLabel, _readContrastLabel });
-        layout.Controls.Add(readPanel, 1, 7);
+        layout.Controls.Add(readPanel, 1, 8);
 
         // Status and Save
-        layout.Controls.Add(new Label { Text = "", Anchor = AnchorStyles.Left }, 0, 8);
-        _statusLabel = new Label { Text = "Ready", Dock = DockStyle.Fill, AutoEllipsis = true };
-        layout.Controls.Add(_statusLabel, 1, 8);
-
-        var bottomPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.RightToLeft };
+        layout.Controls.Add(new Label { Text = "", Anchor = AnchorStyles.Left }, 0, 9);
+        var statusPanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            Margin = new Padding(0, 8, 0, 0)
+        };
+        _statusLabel = new Label
+        {
+            Text = "Ready",
+            AutoSize = true,
+            Anchor = AnchorStyles.Left,
+            Margin = new Padding(0, 6, 10, 0)
+        };
         _saveButton = new Button { Text = "Save", Width = 90 };
-        bottomPanel.Controls.Add(_saveButton);
-        layout.Controls.Add(bottomPanel, 1, 9);
+        statusPanel.Controls.Add(_statusLabel);
+        statusPanel.Controls.Add(_saveButton);
+        layout.Controls.Add(statusPanel, 1, 9);
 
         // Wire up events
         _profileList.SelectedIndexChanged += OnProfileSelected;
@@ -176,14 +186,21 @@ public sealed class SettingsForm : Form
             int selectedIndex = 0;
             if (!string.IsNullOrEmpty(_config.SelectedMonitorHandle))
             {
-                var savedHandle = new IntPtr(long.Parse(_config.SelectedMonitorHandle));
-                for (int i = 0; i < _monitors.Length; i++)
+                try
                 {
-                    if (_monitors[i].Handle == savedHandle)
+                    var savedHandle = new IntPtr(long.Parse(_config.SelectedMonitorHandle));
+                    for (int i = 0; i < _monitors.Length; i++)
                     {
-                        selectedIndex = i;
-                        break;
+                        if (_monitors[i].Handle == savedHandle)
+                        {
+                            selectedIndex = i;
+                            break;
+                        }
                     }
+                }
+                catch
+                {
+                    // Invalid saved handle - fall back to first monitor
                 }
             }
             _monitorComboBox.SelectedIndex = selectedIndex;
@@ -410,20 +427,23 @@ public sealed class SettingsForm : Form
         _statusLabel.Text = success ? successMessage : errorMessage;
         _statusLabel.ForeColor = success ? Color.ForestGreen : Color.OrangeRed;
 
-        if (success)
+        if (success && _monitorComboBox.SelectedItem is PhysicalMonitorInfo monitor)
         {
+            // Capture the handle on the UI thread before starting background work
+            var handle = monitor.Handle;
+
             // Refresh read values after successful write
             _ = Task.Run(async () =>
             {
-                if (TryGetSelectedMonitorHandle(out var handle))
-                {
-                    var brightness = await _displayController.GetBrightnessAsync(handle);
-                    var contrast = await _displayController.GetContrastAsync(handle);
-                    if (brightness.HasValue)
-                        BeginInvoke(() => _readBrightnessLabel.Text = $"Brightness: {brightness.Value}");
-                    if (contrast.HasValue)
-                        BeginInvoke(() => _readContrastLabel.Text = $"Contrast: {contrast.Value}");
-                }
+                var brightness = await _displayController.GetBrightnessAsync(handle);
+                var contrast = await _displayController.GetContrastAsync(handle);
+
+                if (IsDisposed) return;
+
+                if (brightness.HasValue)
+                    BeginInvoke(() => _readBrightnessLabel.Text = $"Brightness: {brightness.Value}");
+                if (contrast.HasValue)
+                    BeginInvoke(() => _readContrastLabel.Text = $"Contrast: {contrast.Value}");
             });
         }
     }

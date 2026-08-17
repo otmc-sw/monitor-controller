@@ -125,6 +125,9 @@ public sealed class DdcController : IDisplayController
             catch (Exception ex)
             {
                 _errorMessage = $"Failed to enumerate monitors: {ex.Message}";
+                // print message and stack trace
+                Console.WriteLine($"Error: {_errorMessage}");
+                Console.WriteLine(ex.StackTrace);
             }
 
             return monitors.ToArray();
