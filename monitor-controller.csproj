@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <RootNamespace>monitor_controller</RootNamespace>
-    <AssemblyName>Monitor Controller</AssemblyName>
+    <AssemblyName>monitor-controller</AssemblyName>
+    <Version>0.1.1</Version>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
