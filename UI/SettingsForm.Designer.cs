@@ -86,7 +86,8 @@ public partial class SettingsForm
             DropDownStyle = ComboBoxStyle.DropDownList,
             Dock = DockStyle.Fill,
             Font = regularFont,
-            Height = 32
+            Height = 42,
+            Margin = new Padding(0, 8, 0, 16)
         };
         displayLayout.Controls.Add(monitorComboBox, 0, 2);
         displayCard.Controls.Add(displayLayout);
@@ -161,12 +162,11 @@ public partial class SettingsForm
             Font = sectionTitleFont,
             ForeColor = Color.FromArgb(33, 37, 41),
             AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 4, 12, 0)
+            Margin = new Padding(0, 8, 16, 0)
         };
 
         schedulerToggleButton = CreateActionButton("Enabled", 85, 28, true);
-        schedulerToggleButton.Margin = Padding.Empty;
+        schedulerToggleButton.Margin = new Padding(0, 0, 0, 0);
 
         profileHeaderPanel.Controls.Add(titleLabel);
         profileHeaderPanel.Controls.Add(schedulerToggleButton);
@@ -204,7 +204,14 @@ public partial class SettingsForm
         profileEditorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
         profileEditorPanel.Controls.Add(new Label { Text = "Time (HH:mm)", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true }, 0, 0);
-        timeTextBox = new TextBox { Dock = DockStyle.Fill, Text = "08:00", Font = regularFont, Margin = new Padding(0, 2, 0, 8), Height = 26 };
+        timeTextBox = new TextBox 
+        { 
+            Dock = DockStyle.Fill, 
+            Text = "08:00", 
+            Font = new Font("Segoe UI", 10F, FontStyle.Regular), 
+            Margin = new Padding(0, 8, 0, 16), 
+            Height = 30 
+        };
         profileEditorPanel.Controls.Add(timeTextBox, 0, 1);
         profileEditorPanel.SetColumnSpan(timeTextBox, 2);
 
