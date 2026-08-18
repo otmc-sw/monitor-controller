@@ -344,10 +344,27 @@ public partial class SettingsForm
             btn.ForeColor = Color.FromArgb(33, 37, 41);
             btn.FlatAppearance.BorderColor = Color.FromArgb(222, 226, 230);
             
-            // Hiệu ứng hover nhẹ cho nút phụ
-            btn.MouseEnter += (s, e) => btn.BackColor = Color.FromArgb(222, 226, 230);
-            btn.MouseLeave += (s, e) => btn.BackColor = Color.FromArgb(241, 243, 245);
+            // Hiệu ứng hover nhẹ cho nút phụ khi enabled
+            btn.MouseEnter += (s, e) => { if (btn.Enabled) btn.BackColor = Color.FromArgb(222, 226, 230); };
+            btn.MouseLeave += (s, e) => { if (btn.Enabled) btn.BackColor = Color.FromArgb(241, 243, 245); };
         }
+
+        // Tăng độ rõ nét và độ tương phản cho trạng thái Disabled
+        btn.EnabledChanged += (s, e) =>
+        {
+            if (!btn.Enabled)
+            {
+                btn.BackColor = Color.FromArgb(245, 246, 248);
+                btn.ForeColor = Color.FromArgb(140, 145, 150); // Chữ màu xám rõ nét thay vì mờ câm
+                btn.FlatAppearance.BorderColor = Color.FromArgb(215, 218, 222);
+            }
+            else
+            {
+                btn.BackColor = isPrimary ? Color.FromArgb(0, 120, 212) : Color.FromArgb(241, 243, 245);
+                btn.ForeColor = isPrimary ? Color.White : Color.FromArgb(33, 37, 41);
+                btn.FlatAppearance.BorderColor = isPrimary ? Color.FromArgb(0, 100, 180) : Color.FromArgb(222, 226, 230);
+            }
+        };
 
         return btn;
     }
