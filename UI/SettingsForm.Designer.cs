@@ -256,8 +256,9 @@ public partial class SettingsForm
         var bottomButtonsFlow = new FlowLayoutPanel
         {
             AutoSize = true,
+            WrapContents = false,
             FlowDirection = FlowDirection.LeftToRight,
-            Anchor = AnchorStyles.Right,
+            Anchor = AnchorStyles.Right | AnchorStyles.Top,
             Margin = Padding.Empty
         };
 
@@ -265,6 +266,7 @@ public partial class SettingsForm
         resetButton.Margin = new Padding(0, 0, 8, 0);
 
         saveButton = CreateActionButton("Save Configuration", 160, 36, true);
+        saveButton.Margin = Padding.Empty;
 
         bottomButtonsFlow.Controls.Add(resetButton);
         bottomButtonsFlow.Controls.Add(saveButton);
