@@ -11,7 +11,7 @@ public static class AppResources
         var resourceName = assembly
             .GetManifestResourceNames()
             .First(x => x.EndsWith(
-                "monitor-controller.ico",
+                "app.ico",
                 StringComparison.OrdinalIgnoreCase));
 
         using var stream = assembly.GetManifestResourceStream(resourceName)
