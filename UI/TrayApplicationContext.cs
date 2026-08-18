@@ -139,7 +139,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         // Current Profile
         _profileMenuItem = new ToolStripMenuItem(
-            $"Current Profile: {_currentProfile?.Time ?? "None"} (B:{_currentProfile?.Brightness ?? 0} C:{_currentProfile?.Contrast ?? 0})")
+            $"Brightness: {_currentProfile?.Brightness ?? 0} / Contrast: {_currentProfile?.Contrast ?? 0}")
         {
             Enabled = false
         };
@@ -147,8 +147,8 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         // Monitor info
         var monitorText = _monitors.Length == 0
-            ? "Monitor: Not Detected"
-            : $"Monitor: {_monitors[0].Description}";
+            ? "Not Detected Monitor"
+            : $"{_monitors[0].Description}";
         if (_monitors.Length > 1)
         {
             monitorText += $" (+{_monitors.Length - 1} more)";
@@ -169,24 +169,6 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         // Settings
         contextMenu.Items.Add("Settings", null, (s, e) => OpenSettings());
-
-        // Apply Current Profile
-        contextMenu.Items.Add("Apply Current Profile", null, async (s, e) =>
-        {
-            var activeProfile = _scheduler.GetActiveProfile(_config.Profiles);
-            if (activeProfile != null)
-            {
-                await _scheduler.ApplyProfileAsync(activeProfile);
-            }
-            else
-            {
-                _notifyIcon.ShowBalloonTip(
-                    3000,
-                    "Monitor Controller",
-                    "No profiles configured. Open Settings to add one.",
-                    ToolTipIcon.Info);
-            }
-        });
 
         contextMenu.Items.Add(new ToolStripSeparator());
 

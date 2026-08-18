@@ -144,7 +144,6 @@ public sealed class SettingsForm : Form
         {
             Text = "Manual Control",
             Font = sectionTitleFont,
-            Height = 150,
             ForeColor = Color.FromArgb(32, 32, 32),
             AutoSize = true,
             Margin = new Padding(0, 0, 0, 10)
