@@ -264,6 +264,7 @@ public partial class SettingsForm
         {
             Minimum = 0,
             Maximum = 100,
+            Value = 50,
             TickFrequency = 10,
             LargeChange = 10,
             SmallChange = 1,

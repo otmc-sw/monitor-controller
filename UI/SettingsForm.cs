@@ -275,7 +275,7 @@ public partial class SettingsForm : Form
                             _currentProfile.Time == profile.Time &&
                             _currentProfile.Brightness == profile.Brightness &&
                             _currentProfile.Contrast == profile.Contrast;
-            string marker = isActive ? " [ACTIVE]" : "";
+            string marker = isActive ? "✅ ACTIVE" : "";
             _profileList.Items.Add($"{profile.Time}    |    Brightness: {profile.Brightness}%    |    Contrast: {profile.Contrast}%{marker}");
         }
 
