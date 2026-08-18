@@ -23,7 +23,7 @@ public partial class SettingsForm
     {
         Text = "OTMC Monitor Controller";
         Width = 780;
-        Height = 720;
+        Height = 800;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -39,11 +39,13 @@ public partial class SettingsForm
             Padding = new Padding(20),
             AutoScroll = true
         };
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Header Card
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Display Selection Card
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Manual Control Card
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Scheduled Profiles Card
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Status Bar
+        
+        // Cố định chiều cao cho từng dòng card trong mainLayout (thay đổi giá trị số pixel theo ý muốn)
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F)); // 1. Display Selection Card (Cố định chiều cao 110px)
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 220F)); // 2. Manual Control Card (Cố định chiều cao 220px)
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 340F)); // 3. Scheduled Profiles Card (Cố định chiều cao 340px)
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));  // 4. Status Bar & Save Button (Cố định chiều cao 60px)
+        
         Controls.Add(mainLayout);
 
         var regularFont = new Font("Segoe UI", 9.5F, FontStyle.Regular);
@@ -58,7 +60,7 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 3,
-            AutoSize = true
+            AutoSize = false // Tắt tự động giãn kích thước để tuân thủ theo kích thước cố định
         };
         displayLayout.Controls.Add(new Label
         {
@@ -86,7 +88,7 @@ public partial class SettingsForm
         };
         displayLayout.Controls.Add(monitorComboBox, 0, 2);
         displayCard.Controls.Add(displayLayout);
-        mainLayout.Controls.Add(displayCard, 0, 1);
+        mainLayout.Controls.Add(displayCard, 0, 0);
 
         // --- 2. MANUAL CONTROL CARD ---
         var manualCard = CreateCardPanel();
@@ -95,7 +97,7 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 5,
-            AutoSize = true
+            AutoSize = false
         };
         manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -129,7 +131,7 @@ public partial class SettingsForm
         manualLayout.SetColumnSpan(manualContrastTrackBar, 2);
 
         manualCard.Controls.Add(manualLayout);
-        mainLayout.Controls.Add(manualCard, 0, 2);
+        mainLayout.Controls.Add(manualCard, 0, 1);
 
         // --- 3. SCHEDULED PROFILES CARD ---
         var profileCard = CreateCardPanel();
@@ -137,7 +139,8 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 2
+            RowCount = 2,
+            AutoSize = false
         };
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -155,10 +158,12 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 1
+            RowCount = 1,
+            AutoSize = false
         };
-        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
-        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
+        // Cố định tỷ lệ hoặc kích thước các cột bên trong phần Profile (ví dụ: Cột trái rộng cố định 250px, cột phải phần trăm còn lại)
+        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F)); 
+        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
         // Left side: ListBox
         profileList = new ListBox
@@ -176,8 +181,8 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 8,
-            AutoSize = true
+            RowCount = 7,
+            AutoSize = false
         };
         profileEditorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         profileEditorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -222,7 +227,7 @@ public partial class SettingsForm
         profileSplitLayout.Controls.Add(profileEditorPanel, 1, 0);
         profileCardLayout.Controls.Add(profileSplitLayout, 0, 1);
         profileCard.Controls.Add(profileCardLayout);
-        mainLayout.Controls.Add(profileCard, 0, 3);
+        mainLayout.Controls.Add(profileCard, 0, 2);
 
         // --- 4. STATUS BAR & SAVE BUTTON ---
         var bottomPanel = new TableLayoutPanel
@@ -230,8 +235,8 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 1,
-            Height = 40,
-            Margin = new Padding(0, 8, 0, 0)
+            Margin = new Padding(0, 8, 0, 0),
+            AutoSize = false
         };
         bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -248,7 +253,7 @@ public partial class SettingsForm
 
         bottomPanel.Controls.Add(statusLabel, 0, 0);
         bottomPanel.Controls.Add(saveButton, 1, 0);
-        mainLayout.Controls.Add(bottomPanel, 0, 4);
+        mainLayout.Controls.Add(bottomPanel, 0, 3);
     }
 
     private static TrackBar CreateTrackBar()
