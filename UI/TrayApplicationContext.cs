@@ -1,11 +1,13 @@
 using monitor_controller.Configuration;
 using monitor_controller.Display;
+using monitor_controller.Infrastructure;
 using monitor_controller.Scheduling;
 
 namespace monitor_controller.UI;
 
 public sealed class TrayApplicationContext : ApplicationContext
 {
+    private readonly Icon _trayIcon;
     private readonly NotifyIcon _notifyIcon;
     private readonly IDisplayController _displayController;
     private readonly DisplayScheduler _scheduler;
@@ -25,16 +27,20 @@ public sealed class TrayApplicationContext : ApplicationContext
         _scheduler = scheduler;
         _configService = configService;
 
+        _trayIcon = AppResources.LoadTrayIcon();
+
         _notifyIcon = new NotifyIcon
         {
-            Icon = SystemIcons.Application,
-            Text = "Monitor Controller",
+            Icon = _trayIcon,
+            Text = "OTMC Monitor Controller",
             Visible = true
         };
 
         _notifyIcon.DoubleClick += OnDoubleClick;
         _scheduler.ProfileChanged += OnProfileChanged;
         _scheduler.ErrorOccurred += OnErrorOccurred;
+
+        UpdateTooltip();
 
         InitializeAsync();
     }
@@ -196,6 +202,14 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _enableMenuItem.Text = _scheduler.Enabled ? "Disable" : "Enable";
         }
+        UpdateTooltip();
+    }
+
+    private void UpdateTooltip()
+    {
+        _notifyIcon.Text = _scheduler.Enabled
+            ? "OTMC Monitor Controller - Auto Brightness"
+            : "OTMC Monitor Controller - Disabled";
     }
 
     private void RefreshProfileMenuItem()
@@ -217,6 +231,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     {
         _currentProfile = profile;
         RefreshProfileMenuItem();
+        UpdateTooltip();
     }
 
     private void OnErrorOccurred(object? sender, string error)
@@ -269,6 +284,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         if (disposing)
         {
             _notifyIcon?.Dispose();
+            _trayIcon?.Dispose();
             _scheduler?.Dispose();
             _displayController?.Dispose();
         }
