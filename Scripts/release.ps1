@@ -7,13 +7,13 @@ Set-Location $PSScriptRoot/..
 $version = $csproj.Project.PropertyGroup.Version
 $exe = "bin\monitor-controller-$version.exe"
 
-dotnet publish `
-    -c Release `
-    -r win-x64 `
-    --self-contained true `
-    -p:PublishSingleFile=true
+dotnet publish -c Release
 
 $publishDir = "bin\Release\net10.0-windows\win-x64\publish"
+
+if (Test-Path $exe) {
+    Remove-Item $exe
+}
 
 # Override existing file
 Move-Item `
@@ -21,3 +21,7 @@ Move-Item `
     $exe `
     -Force
 
+gh release create "v$version" `
+    $exe `
+    --title "v$version" `
+    --generate-notes
