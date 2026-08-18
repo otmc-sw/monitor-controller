@@ -34,13 +34,15 @@ if (Test-Path (Join-Path $Target ".git")) {
 
 function e   { Set-Location $TOP; & "$TOP\env.ps1" @args }
 function s   { Set-Location $TOP; & "$Target\project\setup.ps1" @args }
-function run { Set-Location $TOP; & "$TOP\Scripts\run.ps1" @args }
 function t   { Set-Location $TOP; & "$Target\project\test.ps1" @args }
 function p   { Set-Location $TOP; & "$Target\project\push.ps1" @args }
 function f   { Set-Location $TOP; & "$Target\project\format.ps1" @args }
 function b   { Set-Location $TOP; & "$Target\project\build.ps1" @args }
 function tag { Set-Location $TOP; & "$Target\project\tag.ps1" @args }
 function u   { Set-Location $TOP; & "$Target\project\upgrade.ps1" @args }
+
+function run { Set-Location $TOP; & "$TOP\Scripts\run.ps1" @args }
+function rel { Set-Location $TOP; & "$TOP\Scripts\release.ps1" @args }
 
 Write-Host ""
 Write-Host ">>> Environment Loaded on Windows!" -ForegroundColor DarkGreen
