@@ -22,29 +22,29 @@ public partial class SettingsForm
         out Button saveButton)
     {
         Text = "OTMC Monitor Controller";
-        Width = 780;
-        Height = 800;
+        Width = 820;
+        Height = 840;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
-        BackColor = Color.FromArgb(243, 243, 243);
+        BackColor = Color.FromArgb(248, 249, 250); // Màu nền sáng hiện đại hơn
 
         var mainLayout = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 5,
-            Padding = new Padding(20),
+            RowCount = 4,
+            Padding = new Padding(24),
             AutoScroll = true
         };
         
-        // Cố định chiều cao cho từng dòng card trong mainLayout (thay đổi giá trị số pixel theo ý muốn)
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F)); // 1. Display Selection Card (Cố định chiều cao 110px)
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 220F)); // 2. Manual Control Card (Cố định chiều cao 220px)
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 340F)); // 3. Scheduled Profiles Card (Cố định chiều cao 340px)
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));  // 4. Status Bar & Save Button (Cố định chiều cao 60px)
+        // Thiết lập chiều cao chuẩn cho từng Card
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 130F)); // 1. Display Selection
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 200F)); // 2. Manual Control
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 360F)); // 3. Scheduled Profiles
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));  // 4. Status & Save
         
         Controls.Add(mainLayout);
 
@@ -59,24 +59,23 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 3,
-            AutoSize = false // Tắt tự động giãn kích thước để tuân thủ theo kích thước cố định
+            RowCount = 3
         };
         displayLayout.Controls.Add(new Label
         {
-            Text = "Display",
+            Text = "Display Device",
             Font = sectionTitleFont,
-            ForeColor = Color.FromArgb(32, 32, 32),
+            ForeColor = Color.FromArgb(33, 37, 41),
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 4)
+            Margin = new Padding(0, 0, 0, 2)
         }, 0, 0);
         displayLayout.Controls.Add(new Label
         {
-            Text = "Target monitor",
+            Text = "Select the target monitor to control",
             Font = subTextFont,
-            ForeColor = Color.FromArgb(110, 110, 110),
+            ForeColor = Color.FromArgb(108, 117, 125),
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 6)
+            Margin = new Padding(0, 0, 0, 8)
         }, 0, 1);
 
         monitorComboBox = new ComboBox
@@ -96,25 +95,25 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 5,
-            AutoSize = false
+            RowCount = 5
         };
         manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-        manualLayout.Controls.Add(new Label
+        var manualTitle = new Label
         {
             Text = "Manual Control",
             Font = sectionTitleFont,
-            ForeColor = Color.FromArgb(32, 32, 32),
+            ForeColor = Color.FromArgb(33, 37, 41),
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 10)
-        }, 0, 0);
-        manualLayout.SetColumnSpan(manualLayout.GetControlFromPosition(0, 0)!, 2);
+            Margin = new Padding(0, 0, 0, 12)
+        };
+        manualLayout.Controls.Add(manualTitle, 0, 0);
+        manualLayout.SetColumnSpan(manualTitle, 2);
 
         // Brightness row
-        manualLayout.Controls.Add(new Label { Text = "Brightness", Font = regularFont, AutoSize = true }, 0, 1);
-        manualBrightnessValueLabel = new Label { Text = "60", Font = boldFont, AutoSize = true, Anchor = AnchorStyles.Right };
+        manualLayout.Controls.Add(new Label { Text = "Brightness", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true }, 0, 1);
+        manualBrightnessValueLabel = new Label { Text = "60", Font = boldFont, ForeColor = Color.FromArgb(33, 37, 41), AutoSize = true, Anchor = AnchorStyles.Right };
         manualLayout.Controls.Add(manualBrightnessValueLabel, 1, 1);
 
         manualBrightnessTrackBar = CreateTrackBar();
@@ -122,8 +121,8 @@ public partial class SettingsForm
         manualLayout.SetColumnSpan(manualBrightnessTrackBar, 2);
 
         // Contrast row
-        manualLayout.Controls.Add(new Label { Text = "Contrast", Font = regularFont, AutoSize = true, Margin = new Padding(0, 4, 0, 0) }, 0, 3);
-        manualContrastValueLabel = new Label { Text = "30", Font = boldFont, AutoSize = true, Anchor = AnchorStyles.Right, Margin = new Padding(0, 4, 0, 0) };
+        manualLayout.Controls.Add(new Label { Text = "Contrast", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true, Margin = new Padding(0, 6, 0, 0) }, 0, 3);
+        manualContrastValueLabel = new Label { Text = "30", Font = boldFont, ForeColor = Color.FromArgb(33, 37, 41), AutoSize = true, Anchor = AnchorStyles.Right, Margin = new Padding(0, 6, 0, 0) };
         manualLayout.Controls.Add(manualContrastValueLabel, 1, 3);
 
         manualContrastTrackBar = CreateTrackBar();
@@ -139,8 +138,7 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 2,
-            AutoSize = false
+            RowCount = 2
         };
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -149,20 +147,18 @@ public partial class SettingsForm
         {
             Text = "Scheduled Profiles",
             Font = sectionTitleFont,
-            ForeColor = Color.FromArgb(32, 32, 32),
+            ForeColor = Color.FromArgb(33, 37, 41),
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 10)
+            Margin = new Padding(0, 0, 0, 12)
         }, 0, 0);
 
         var profileSplitLayout = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 1,
-            AutoSize = false
+            RowCount = 1
         };
-        // Cố định tỷ lệ hoặc kích thước các cột bên trong phần Profile (ví dụ: Cột trái rộng cố định 250px, cột phải phần trăm còn lại)
-        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F)); 
+        profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 360F)); 
         profileSplitLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
         // Left side: ListBox
@@ -171,7 +167,7 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             IntegralHeight = false,
             Font = regularFont,
-            Margin = new Padding(0, 0, 10, 0),
+            Margin = new Padding(0, 0, 12, 0),
             BorderStyle = BorderStyle.FixedSingle
         };
         profileSplitLayout.Controls.Add(profileList, 0, 0);
@@ -181,27 +177,26 @@ public partial class SettingsForm
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 7,
-            AutoSize = false
+            RowCount = 7
         };
         profileEditorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         profileEditorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-        profileEditorPanel.Controls.Add(new Label { Text = "Time (HH:mm)", Font = regularFont, AutoSize = true }, 0, 0);
-        timeTextBox = new TextBox { Dock = DockStyle.Fill, Text = "08:00", Font = regularFont, Margin = new Padding(0, 2, 0, 8) };
+        profileEditorPanel.Controls.Add(new Label { Text = "Time (HH:mm)", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true }, 0, 0);
+        timeTextBox = new TextBox { Dock = DockStyle.Fill, Text = "08:00", Font = regularFont, Margin = new Padding(0, 2, 0, 8), Height = 26 };
         profileEditorPanel.Controls.Add(timeTextBox, 0, 1);
         profileEditorPanel.SetColumnSpan(timeTextBox, 2);
 
-        profileEditorPanel.Controls.Add(new Label { Text = "Brightness", Font = regularFont, AutoSize = true }, 0, 2);
-        profileBrightnessValueLabel = new Label { Text = "50", Font = boldFont, AutoSize = true, Anchor = AnchorStyles.Right };
+        profileEditorPanel.Controls.Add(new Label { Text = "Profile Brightness", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true }, 0, 2);
+        profileBrightnessValueLabel = new Label { Text = "50", Font = boldFont, ForeColor = Color.FromArgb(33, 37, 41), AutoSize = true, Anchor = AnchorStyles.Right };
         profileEditorPanel.Controls.Add(profileBrightnessValueLabel, 1, 2);
 
         profileBrightnessTrackBar = CreateTrackBar();
         profileEditorPanel.Controls.Add(profileBrightnessTrackBar, 0, 3);
         profileEditorPanel.SetColumnSpan(profileBrightnessTrackBar, 2);
 
-        profileEditorPanel.Controls.Add(new Label { Text = "Contrast", Font = regularFont, AutoSize = true, Margin = new Padding(0, 6, 0, 0) }, 0, 4);
-        profileContrastValueLabel = new Label { Text = "50", Font = boldFont, AutoSize = true, Anchor = AnchorStyles.Right, Margin = new Padding(0, 6, 0, 0) };
+        profileEditorPanel.Controls.Add(new Label { Text = "Profile Contrast", Font = regularFont, ForeColor = Color.FromArgb(73, 80, 87), AutoSize = true, Margin = new Padding(0, 4, 0, 0) }, 0, 4);
+        profileContrastValueLabel = new Label { Text = "50", Font = boldFont, ForeColor = Color.FromArgb(33, 37, 41), AutoSize = true, Anchor = AnchorStyles.Right, Margin = new Padding(0, 4, 0, 0) };
         profileEditorPanel.Controls.Add(profileContrastValueLabel, 1, 4);
 
         profileContrastTrackBar = CreateTrackBar();
@@ -214,12 +209,18 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             AutoSize = true,
             FlowDirection = FlowDirection.LeftToRight,
-            Margin = new Padding(0, 10, 0, 0)
+            Margin = new Padding(0, 8, 0, 0)
         };
-        addButton = CreateStandardButton("Add", 70, 30);
-        applyButton = CreateStandardButton("Apply", 70, 30);
-        editButton = CreateStandardButton("Edit", 70, 30);
-        deleteButton = CreateStandardButton("Delete", 70, 30);
+        addButton = CreateActionButton("Add", 65, 28, false);
+        applyButton = CreateActionButton("Apply", 65, 28, false);
+        editButton = CreateActionButton("Edit", 65, 28, false);
+        deleteButton = CreateActionButton("Delete", 65, 28, false);
+        
+        // Thêm khoảng cách nhỏ giữa các nút
+        addButton.Margin = new Padding(0, 0, 6, 0);
+        applyButton.Margin = new Padding(0, 0, 6, 0);
+        editButton.Margin = new Padding(0, 0, 6, 0);
+
         actionButtonsFlow.Controls.AddRange(new Control[] { addButton, applyButton, editButton, deleteButton });
         profileEditorPanel.Controls.Add(actionButtonsFlow, 0, 6);
         profileEditorPanel.SetColumnSpan(actionButtonsFlow, 2);
@@ -235,21 +236,22 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 1,
-            Margin = new Padding(0, 8, 0, 0),
-            AutoSize = false
+            Margin = new Padding(0, 4, 0, 0)
         };
         bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
         statusLabel = new Label
         {
-            Text = "Ready",
+            Text = "● Ready",
             AutoSize = true,
             Anchor = AnchorStyles.Left,
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Italic),
-            ForeColor = Color.FromArgb(90, 90, 90)
+            Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
+            ForeColor = Color.FromArgb(40, 167, 69) // Màu xanh trạng thái tích cực
         };
-        saveButton = CreateStandardButton("Save Configuration", 150, 36);
+        
+        // Nút Save chính (Primary Button nổi bật)
+        saveButton = CreateActionButton("Save Configuration", 160, 36, true);
 
         bottomPanel.Controls.Add(statusLabel, 0, 0);
         bottomPanel.Controls.Add(saveButton, 1, 0);
@@ -266,7 +268,7 @@ public partial class SettingsForm
             LargeChange = 10,
             SmallChange = 1,
             Dock = DockStyle.Fill,
-            Height = 38
+            Height = 32
         };
     }
 
@@ -275,23 +277,42 @@ public partial class SettingsForm
         return new Panel
         {
             Dock = DockStyle.Fill,
-            Padding = new Padding(16),
-            Margin = new Padding(0, 0, 0, 12),
-            BackColor = Color.White,
-            BorderStyle = BorderStyle.FixedSingle
+            Padding = new Padding(18),
+            Margin = new Padding(0, 0, 0, 14),
+            BackColor = Color.White
         };
     }
 
-    private static Button CreateStandardButton(string text, int width, int height)
+    private static Button CreateActionButton(string text, int width, int height, bool isPrimary)
     {
         var btn = new Button
         {
             Text = text,
             Height = height,
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-            UseVisualStyleBackColor = true
+            Width = width,
+            Font = new Font("Segoe UI", 9.5F, isPrimary ? FontStyle.Bold : FontStyle.Regular),
+            FlatStyle = FlatStyle.Flat,
+            UseVisualStyleBackColor = false,
+            Cursor = Cursors.Hand
         };
-        if (width > 0) btn.Width = width;
+
+        if (isPrimary)
+        {
+            btn.BackColor = Color.FromArgb(0, 120, 212); // Xanh Windows Accent
+            btn.ForeColor = Color.White;
+            btn.FlatAppearance.BorderColor = Color.FromArgb(0, 100, 180);
+        }
+        else
+        {
+            btn.BackColor = Color.FromArgb(241, 243, 245);
+            btn.ForeColor = Color.FromArgb(33, 37, 41);
+            btn.FlatAppearance.BorderColor = Color.FromArgb(222, 226, 230);
+            
+            // Hiệu ứng hover nhẹ cho nút phụ
+            btn.MouseEnter += (s, e) => btn.BackColor = Color.FromArgb(222, 226, 230);
+            btn.MouseLeave += (s, e) => btn.BackColor = Color.FromArgb(241, 243, 245);
+        }
+
         return btn;
     }
 }
