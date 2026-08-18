@@ -260,7 +260,7 @@ public partial class SettingsForm
 
     private static TrackBar CreateTrackBar()
     {
-        return new TrackBar
+        var trackBar = new TrackBar
         {
             Minimum = 0,
             Maximum = 100,
@@ -270,6 +270,23 @@ public partial class SettingsForm
             Dock = DockStyle.Fill,
             Height = 32
         };
+
+        trackBar.MouseDown += (s, e) =>
+        {
+            if (e.Button == MouseButtons.Left && s is TrackBar tb)
+            {
+                const int padding = 12;
+                int usableWidth = tb.Width - (2 * padding);
+                if (usableWidth > 0)
+                {
+                    double ratio = (double)(e.X - padding) / usableWidth;
+                    int value = tb.Minimum + (int)Math.Round(ratio * (tb.Maximum - tb.Minimum));
+                    tb.Value = Math.Clamp(value, tb.Minimum, tb.Maximum);
+                }
+            }
+        };
+
+        return trackBar;
     }
 
     private static Panel CreateCardPanel()
