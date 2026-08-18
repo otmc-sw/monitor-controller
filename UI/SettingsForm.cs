@@ -27,6 +27,9 @@ public partial class SettingsForm : Form
     private CancellationTokenSource? _contrastCts;
 
     // Profile Controls
+    private bool _isSchedulerEnabled = true;
+    private readonly Button _schedulerToggleButton;
+    private readonly TableLayoutPanel _profileSplitLayout;
     private readonly ListBox _profileList;
     private readonly TextBox _timeTextBox;
     private readonly TrackBar _profileBrightnessTrackBar;
@@ -65,6 +68,8 @@ public partial class SettingsForm : Form
             out _manualContrastTrackBar,
             out _manualBrightnessValueLabel,
             out _manualContrastValueLabel,
+            out _schedulerToggleButton,
+            out _profileSplitLayout,
             out _profileList,
             out _timeTextBox,
             out _profileBrightnessTrackBar,
@@ -79,6 +84,13 @@ public partial class SettingsForm : Form
             out _statusLabel,
             out _saveButton
         );
+
+        // Wire up scheduler toggle button
+        _schedulerToggleButton.Click += (s, e) =>
+        {
+            _isSchedulerEnabled = !_isSchedulerEnabled;
+            UpdateSchedulerPanelState();
+        };
 
         // Wire up manual slider events
         _manualBrightnessTrackBar.ValueChanged += OnManualBrightnessChanged;
@@ -266,7 +278,29 @@ public partial class SettingsForm : Form
             _monitorComboBox.SelectedIndex = selectedIndex;
         }
 
+        _isSchedulerEnabled = _config.IsSchedulerEnabled;
+        UpdateSchedulerPanelState();
+
         RefreshProfileList();
+    }
+
+    private void UpdateSchedulerPanelState()
+    {
+        _profileSplitLayout.Enabled = _isSchedulerEnabled;
+        if (_isSchedulerEnabled)
+        {
+            _schedulerToggleButton.Text = "Enabled";
+            _schedulerToggleButton.BackColor = Color.FromArgb(0, 120, 212);
+            _schedulerToggleButton.ForeColor = Color.White;
+            _schedulerToggleButton.FlatAppearance.BorderColor = Color.FromArgb(0, 100, 180);
+        }
+        else
+        {
+            _schedulerToggleButton.Text = "Disabled";
+            _schedulerToggleButton.BackColor = Color.FromArgb(241, 243, 245);
+            _schedulerToggleButton.ForeColor = Color.FromArgb(108, 117, 125);
+            _schedulerToggleButton.FlatAppearance.BorderColor = Color.FromArgb(222, 226, 230);
+        }
     }
 
     private void RefreshProfileList()
@@ -397,7 +431,12 @@ public partial class SettingsForm : Form
             selectedMonitorHandle = selectedMonitor.Handle.ToString();
         }
 
-        _config = _config with { SelectedMonitorHandle = selectedMonitorHandle };
+        _config = _config with 
+        { 
+            SelectedMonitorHandle = selectedMonitorHandle,
+            IsFirstRun = false,
+            IsSchedulerEnabled = _isSchedulerEnabled
+        };
         await _configService.SaveAsync(_config);
 
         if (_monitorComboBox.SelectedItem is PhysicalMonitorInfo monitor)

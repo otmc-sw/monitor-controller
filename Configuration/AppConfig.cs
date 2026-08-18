@@ -4,7 +4,9 @@ namespace monitor_controller.Configuration;
 
 public record AppConfig(
     List<DisplayProfile> Profiles,
-    string? SelectedMonitorHandle
+    string? SelectedMonitorHandle,
+    bool IsFirstRun = true,
+    bool IsSchedulerEnabled = true
 )
 {
     public static AppConfig Default => new(

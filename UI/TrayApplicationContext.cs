@@ -84,6 +84,7 @@ public sealed class TrayApplicationContext : ApplicationContext
                     ToolTipIcon.Warning);
             }
 
+            _scheduler.Enabled = _config.IsSchedulerEnabled;
             await _scheduler.StartAsync(_config.Profiles);
             BuildContextMenu();
         }
@@ -247,6 +248,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             _scheduler.SetSelectedMonitor(SelectMonitorHandle());
 
             // Restart scheduler to pick up any profile changes
+            _scheduler.Enabled = _config.IsSchedulerEnabled;
             await _scheduler.StartAsync(_config.Profiles);
 
             BuildContextMenu();

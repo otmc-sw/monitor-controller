@@ -8,6 +8,8 @@ public partial class SettingsForm
         out TrackBar manualContrastTrackBar,
         out Label manualBrightnessValueLabel,
         out Label manualContrastValueLabel,
+        out Button schedulerToggleButton,
+        out TableLayoutPanel profileSplitLayout,
         out ListBox profileList,
         out TextBox timeTextBox,
         out TrackBar profileBrightnessTrackBar,
@@ -144,16 +146,34 @@ public partial class SettingsForm
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         profileCardLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-        profileCardLayout.Controls.Add(new Label
+        var profileHeaderPanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            AutoSize = true,
+            Margin = new Padding(0, 0, 0, 12)
+        };
+
+        var titleLabel = new Label
         {
             Text = "Scheduled Profiles",
             Font = sectionTitleFont,
             ForeColor = Color.FromArgb(33, 37, 41),
             AutoSize = true,
-            Margin = new Padding(0, 0, 0, 12)
-        }, 0, 0);
+            Anchor = AnchorStyles.Left,
+            Margin = new Padding(0, 4, 12, 0)
+        };
 
-        var profileSplitLayout = new TableLayoutPanel
+        schedulerToggleButton = CreateActionButton("Enabled", 85, 28, true);
+        schedulerToggleButton.Margin = Padding.Empty;
+
+        profileHeaderPanel.Controls.Add(titleLabel);
+        profileHeaderPanel.Controls.Add(schedulerToggleButton);
+
+        profileCardLayout.Controls.Add(profileHeaderPanel, 0, 0);
+
+        profileSplitLayout = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
