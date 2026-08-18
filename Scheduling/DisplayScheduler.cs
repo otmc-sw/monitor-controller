@@ -198,11 +198,18 @@ public sealed class DisplayScheduler : IDisposable
             var activeProfile = GetActiveProfile(profiles);
             if (activeProfile == null) return;
 
+            Logger.Info($"Active profile: {activeProfile.Time}");
+
             // Only apply if the profile has actually changed
             if (_lastAppliedProfile != null && ProfilesEqual(_lastAppliedProfile, activeProfile))
             {
+                Logger.Info("Profile unchanged, skipping apply.");
                 return;
             }
+
+            Logger.Info(
+                $"Active profile changed: {activeProfile.Time}. " +
+                $"Applying brightness={activeProfile.Brightness}, contrast={activeProfile.Contrast}");
 
             await ApplyProfileAsync(activeProfile);
         }
