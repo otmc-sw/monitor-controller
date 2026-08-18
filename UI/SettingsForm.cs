@@ -39,8 +39,9 @@ public partial class SettingsForm : Form
     private readonly Button _deleteButton;
     private readonly Button _applyButton;
 
-    // Bottom Status & Save
+    // Bottom Status & Save & Reset
     private readonly Label _statusLabel;
+    private readonly Button _resetButton;
     private readonly Button _saveButton;
 
     public SettingsForm(
@@ -74,6 +75,7 @@ public partial class SettingsForm : Form
             out _editButton,
             out _deleteButton,
             out _applyButton,
+            out _resetButton,
             out _statusLabel,
             out _saveButton
         );
@@ -92,6 +94,7 @@ public partial class SettingsForm : Form
         _editButton.Click += OnEditProfile;
         _deleteButton.Click += OnDeleteProfile;
         _applyButton.Click += OnApplyProfile;
+        _resetButton.Click += OnResetDefault;
         _saveButton.Click += OnSave;
 
         LoadConfig();
@@ -367,6 +370,23 @@ public partial class SettingsForm : Form
         await _scheduler.ApplyProfileAsync(profile);
         _statusLabel.Text = $"Applied profile: {time} (B:{brightness} C:{contrast})";
         _statusLabel.ForeColor = Color.SeaGreen;
+    }
+
+    private void OnResetDefault(object? sender, EventArgs e)
+    {
+        if (MessageBox.Show(
+                "Reset all profiles to default schedule?",
+                "Confirm Reset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
+        {
+            var defaultProfiles = AppConfig.Default.Profiles;
+            _config.Profiles.Clear();
+            _config.Profiles.AddRange(defaultProfiles);
+            RefreshProfileList();
+            _statusLabel.Text = "Profiles reset to default.";
+            _statusLabel.ForeColor = Color.SeaGreen;
+        }
     }
 
     private async void OnSave(object? sender, EventArgs e)

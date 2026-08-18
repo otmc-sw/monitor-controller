@@ -18,6 +18,7 @@ public partial class SettingsForm
         out Button editButton,
         out Button deleteButton,
         out Button applyButton,
+        out Button resetButton,
         out Label statusLabel,
         out Button saveButton)
     {
@@ -232,7 +233,7 @@ public partial class SettingsForm
         profileCard.Controls.Add(profileCardLayout);
         mainLayout.Controls.Add(profileCard, 0, 2);
 
-        // --- 4. STATUS BAR & SAVE BUTTON ---
+        // --- 4. STATUS BAR & SAVE / RESET BUTTONS ---
         var bottomPanel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
@@ -252,11 +253,24 @@ public partial class SettingsForm
             ForeColor = Color.FromArgb(40, 167, 69) // Màu xanh trạng thái tích cực
         };
         
-        // Nút Save chính (Primary Button nổi bật)
+        var bottomButtonsFlow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            Anchor = AnchorStyles.Right,
+            Margin = Padding.Empty
+        };
+
+        resetButton = CreateActionButton("Reset Default", 110, 36, false);
+        resetButton.Margin = new Padding(0, 0, 8, 0);
+
         saveButton = CreateActionButton("Save Configuration", 160, 36, true);
 
+        bottomButtonsFlow.Controls.Add(resetButton);
+        bottomButtonsFlow.Controls.Add(saveButton);
+
         bottomPanel.Controls.Add(statusLabel, 0, 0);
-        bottomPanel.Controls.Add(saveButton, 1, 0);
+        bottomPanel.Controls.Add(bottomButtonsFlow, 1, 0);
         mainLayout.Controls.Add(bottomPanel, 0, 3);
     }
 
