@@ -203,23 +203,25 @@ public partial class SettingsForm
         profileEditorPanel.Controls.Add(profileContrastTrackBar, 0, 5);
         profileEditorPanel.SetColumnSpan(profileContrastTrackBar, 2);
 
-        // Action Buttons: Add, Apply, Edit, Delete
+        // Action Buttons: Add, Apply, Edit(Save), Delete
         var actionButtonsFlow = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
+            WrapContents = false,
             AutoSize = true,
             FlowDirection = FlowDirection.LeftToRight,
             Margin = new Padding(0, 8, 0, 0)
         };
-        addButton = CreateActionButton("Add", 65, 28, false);
-        applyButton = CreateActionButton("Apply", 65, 28, false);
-        editButton = CreateActionButton("Edit", 65, 28, false);
-        deleteButton = CreateActionButton("Delete", 65, 28, false);
+        addButton = CreateActionButton("Add", 62, 28, false);
+        applyButton = CreateActionButton("Apply", 62, 28, false);
+        editButton = CreateActionButton("Save", 62, 28, false);
+        deleteButton = CreateActionButton("Delete", 62, 28, false);
         
         // Thêm khoảng cách nhỏ giữa các nút
-        addButton.Margin = new Padding(0, 0, 6, 0);
-        applyButton.Margin = new Padding(0, 0, 6, 0);
-        editButton.Margin = new Padding(0, 0, 6, 0);
+        addButton.Margin = new Padding(0, 0, 4, 0);
+        applyButton.Margin = new Padding(0, 0, 4, 0);
+        editButton.Margin = new Padding(0, 0, 4, 0);
+        deleteButton.Margin = new Padding(0, 0, 0, 0);
 
         actionButtonsFlow.Controls.AddRange(new Control[] { addButton, applyButton, editButton, deleteButton });
         profileEditorPanel.Controls.Add(actionButtonsFlow, 0, 6);

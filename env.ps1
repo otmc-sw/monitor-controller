@@ -34,7 +34,7 @@ if (Test-Path (Join-Path $Target ".git")) {
 
 function e   { Set-Location $TOP; & "$TOP\env.ps1" @args }
 function s   { Set-Location $TOP; & "$Target\project\setup.ps1" @args }
-function run { Set-Location $TOP; & "$Target\project\run.ps1" @args }
+function run { Set-Location $TOP; & "$TOP\Scripts\run.ps1" @args }
 function t   { Set-Location $TOP; & "$Target\project\test.ps1" @args }
 function p   { Set-Location $TOP; & "$Target\project\push.ps1" @args }
 function f   { Set-Location $TOP; & "$Target\project\format.ps1" @args }
