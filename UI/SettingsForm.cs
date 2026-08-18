@@ -46,7 +46,7 @@ public sealed class SettingsForm : Form
         _monitors = monitors;
         _currentProfile = currentProfile;
 
-        Text = "MonitorController Settings";
+        Text = "Monitor Controller Settings";
         Width = 520;
         Height = 560;
         FormBorderStyle = FormBorderStyle.FixedSingle;

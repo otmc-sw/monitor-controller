@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>monitor_controller</RootNamespace>
-    <AssemblyName>MonitorController</AssemblyName>
+    <AssemblyName>Monitor Controller</AssemblyName>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>

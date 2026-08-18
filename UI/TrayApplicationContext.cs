@@ -28,7 +28,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon = new NotifyIcon
         {
             Icon = SystemIcons.Application,
-            Text = "MonitorController",
+            Text = "Monitor Controller",
             Visible = true
         };
 
@@ -53,7 +53,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 _notifyIcon.ShowBalloonTip(
                     5000,
-                    "MonitorController",
+                    "Monitor Controller",
                     "No physical monitors detected. DDC/CI may be unavailable.",
                     ToolTipIcon.Warning);
             }
@@ -61,7 +61,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 _notifyIcon.ShowBalloonTip(
                     5000,
-                    "MonitorController Error",
+                    "Monitor Controller Error",
                     _displayController.ErrorMessage ?? "DDC/CI is unavailable.",
                     ToolTipIcon.Error);
             }
@@ -73,7 +73,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 _notifyIcon.ShowBalloonTip(
                     5000,
-                    "MonitorController",
+                    "Monitor Controller",
                     "No monitor selected. Open Settings to choose a monitor.",
                     ToolTipIcon.Warning);
             }
@@ -85,7 +85,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _notifyIcon.ShowBalloonTip(
                 5000,
-                "MonitorController Error",
+                "Monitor Controller Error",
                 $"Failed to initialize: {ex.Message}",
                 ToolTipIcon.Error);
 
@@ -176,7 +176,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             {
                 _notifyIcon.ShowBalloonTip(
                     3000,
-                    "MonitorController",
+                    "Monitor Controller",
                     "No profiles configured. Open Settings to add one.",
                     ToolTipIcon.Info);
             }
@@ -223,7 +223,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     {
         _notifyIcon.ShowBalloonTip(
             3000,
-            "MonitorController Error",
+            "Monitor Controller Error",
             error,
             ToolTipIcon.Error);
     }

@@ -7,7 +7,7 @@ public sealed class ConfigService
 {
     private static readonly string ConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "MonitorController",
+        "Monitor Controller",
         "config.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new()

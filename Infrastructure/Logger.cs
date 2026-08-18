@@ -4,7 +4,7 @@ namespace monitor_controller.Infrastructure;
 
 /// <summary>
 /// Simple thread-safe file logger for diagnostic purposes.
-/// Writes to %LOCALAPPDATA%\MonitorController\logs\monitor-controller.log
+/// Writes to %LOCALAPPDATA%\Monitor Controller\logs\monitor-controller.log
 /// Never throws exceptions back to the application.
 /// </summary>
 public static class Logger
@@ -12,7 +12,7 @@ public static class Logger
     private static readonly object SyncRoot = new();
     private static readonly string LogDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "MonitorController",
+        "Monitor Controller",
         "logs");
 
     private static readonly string LogFilePath = Path.Combine(LogDirectory, "monitor-controller.log");
