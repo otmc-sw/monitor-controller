@@ -4,11 +4,15 @@ namespace monitor_controller.Infrastructure;
 
 /// <summary>
 /// Simple thread-safe file logger for diagnostic purposes.
-/// Writes to %LOCALAPPDATA%\Monitor Controller\logs\monitor-controller.log
+/// Writes to %LOCALAPPDATA%\MonitorController\logs\monitor-controller.log
+/// Rotates the log file when it exceeds 3 MB, keeping a maximum of 3 rotated files.
 /// Never throws exceptions back to the application.
 /// </summary>
 public static class Logger
 {
+    private const long MaxLogFileSizeBytes = 3 * 1024 * 1024; // 3 MB
+    private const int MaxRotatedFiles = 3;
+
     private static readonly object SyncRoot = new();
     private static readonly string LogDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -34,6 +38,9 @@ public static class Logger
             {
                 Directory.CreateDirectory(LogDirectory);
 
+                // Rotate the log file if it exceeds the maximum size
+                RotateIfNeeded();
+
                 var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{level}] {message}";
 
                 File.AppendAllText(LogFilePath, line + Environment.NewLine, Encoding.UTF8);
@@ -43,5 +50,35 @@ public static class Logger
         {
             // Logging must never crash the application.
         }
+    }
+
+    private static void RotateIfNeeded()
+    {
+        var fileInfo = new FileInfo(LogFilePath);
+        if (!fileInfo.Exists || fileInfo.Length < MaxLogFileSizeBytes)
+        {
+            return;
+        }
+
+        // Delete the oldest rotated file if it exists
+        var oldestFile = Path.Combine(LogDirectory, $"monitor-controller.log.{MaxRotatedFiles}");
+        if (File.Exists(oldestFile))
+        {
+            File.Delete(oldestFile);
+        }
+
+        // Shift rotated files: .2 -> .3, .1 -> .2, etc.
+        for (int i = MaxRotatedFiles - 1; i >= 1; i--)
+        {
+            var source = Path.Combine(LogDirectory, $"monitor-controller.log.{i}");
+            var destination = Path.Combine(LogDirectory, $"monitor-controller.log.{i + 1}");
+            if (File.Exists(source))
+            {
+                File.Move(source, destination, overwrite: true);
+            }
+        }
+
+        // Rotate the current log file to .1
+        File.Move(LogFilePath, Path.Combine(LogDirectory, "monitor-controller.log.1"), overwrite: true);
     }
 }
