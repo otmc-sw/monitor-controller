@@ -46,6 +46,9 @@ public sealed class TrayApplicationContext : ApplicationContext
             _config = await _configService.LoadAsync();
             _monitors = await _displayController.EnumerateMonitorsAsync();
 
+            // Auto-select the first available monitor if the user hasn't selected one yet
+            _scheduler.SetDefaultMonitor(_monitors);
+
             if (_monitors.Length == 0)
             {
                 _notifyIcon.ShowBalloonTip(
@@ -112,8 +115,13 @@ public sealed class TrayApplicationContext : ApplicationContext
             }
         }
 
-        // Default to the first monitor
-        var first = _monitors[0];
+        // Default to the first monitor with a valid (non-zero) handle
+        var first = _monitors.FirstOrDefault(m => m.Handle != IntPtr.Zero);
+        if (first == null)
+        {
+            return IntPtr.Zero;
+        }
+
         _config = _config with { SelectedMonitorHandle = first.Handle.ToString() };
         _ = _configService.SaveAsync(_config);
         return first.Handle;
@@ -234,6 +242,9 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _config = await _configService.LoadAsync();
             _monitors = await _displayController.EnumerateMonitorsAsync();
+
+            // Auto-select the first available monitor if the user hasn't selected one yet
+            _scheduler.SetDefaultMonitor(_monitors);
 
             // Re-select the monitor after settings changes
             _scheduler.SetSelectedMonitor(SelectMonitorHandle());

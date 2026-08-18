@@ -1,4 +1,5 @@
 using monitor_controller.Display;
+using monitor_controller.Infrastructure;
 
 namespace monitor_controller.Scheduling;
 
@@ -22,6 +23,9 @@ public sealed class DisplayScheduler : IDisposable
         set => _enabled = value;
     }
 
+    public bool HasSelectedMonitor =>
+        _selectedMonitorHandle != IntPtr.Zero;
+
     public DisplayScheduler(IDisplayController displayController)
     {
         _displayController = displayController;
@@ -30,12 +34,57 @@ public sealed class DisplayScheduler : IDisposable
 
     public void SetSelectedMonitor(IntPtr handle)
     {
+        // Do not override a valid selection with a zero handle
+        if (handle == IntPtr.Zero && _selectedMonitorHandle != IntPtr.Zero)
+        {
+            return;
+        }
+
         if (_selectedMonitorHandle != handle)
         {
             _selectedMonitorHandle = handle;
             // Force re-apply on next check so the profile is applied to the new monitor
             _lastAppliedProfile = null;
+
+            if (handle != IntPtr.Zero)
+            {
+                Logger.Info($"Selected monitor: Handle=0x{handle.ToInt64():X}");
+            }
         }
+    }
+
+    /// <summary>
+    /// Automatically selects the first available physical monitor if no monitor
+    /// has been explicitly selected yet. Preserves an existing selection.
+    /// </summary>
+    public void SetDefaultMonitor(IEnumerable<PhysicalMonitorInfo> monitors)
+    {
+        if (_selectedMonitorHandle != IntPtr.Zero)
+        {
+            // Keep the existing selection
+            return;
+        }
+
+        var monitorList = monitors.ToList();
+        if (monitorList.Count == 0)
+        {
+            Logger.Warning("No physical monitor available for scheduler.");
+            return;
+        }
+
+        // Find the first monitor with a valid (non-zero) handle
+        var first = monitorList.FirstOrDefault(m => m.Handle != IntPtr.Zero);
+        if (first == null)
+        {
+            Logger.Warning("No physical monitor with a valid handle available for scheduler.");
+            return;
+        }
+
+        _selectedMonitorHandle = first.Handle;
+        _lastAppliedProfile = null;
+
+        Logger.Info(
+            $"Automatically selected monitor: {first.Description}, Handle=0x{first.Handle.ToInt64():X}");
     }
 
     /// <summary>
@@ -141,7 +190,8 @@ public sealed class DisplayScheduler : IDisposable
 
             if (_selectedMonitorHandle == IntPtr.Zero)
             {
-                ErrorOccurred?.Invoke(this, "No monitor selected");
+                Logger.Warning("No physical monitor available for scheduler.");
+                ErrorOccurred?.Invoke(this, "No physical monitor available.");
                 return;
             }
 
@@ -174,7 +224,8 @@ public sealed class DisplayScheduler : IDisposable
 
             if (_selectedMonitorHandle == IntPtr.Zero)
             {
-                ErrorOccurred?.Invoke(this, "No monitor selected");
+                Logger.Warning("No physical monitor available for scheduler.");
+                ErrorOccurred?.Invoke(this, "No physical monitor available.");
                 return;
             }
 
