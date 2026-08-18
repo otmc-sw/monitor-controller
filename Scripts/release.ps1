@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 
 Set-Location $PSScriptRoot/..
 
-$version = "0.1.1"
-$tag = "v$version"
+[xml]$csproj = Get-Content "monitor-controller.csproj"
+$version = $csproj.Project.PropertyGroup.Version
 $exe = "bin\monitor-controller-$version.exe"
 
 dotnet publish `
@@ -15,20 +15,9 @@ dotnet publish `
 
 $publishDir = "bin\Release\net10.0-windows\win-x64\publish"
 
+# Override existing file
 Move-Item `
     "$publishDir\monitor-controller.exe" `
-    $exe
-
-git add .
-git commit -m "Release $tag"
-git push origin main
-
-git tag $tag
-git push origin $tag
-
-gh release create $tag `
     $exe `
-    --title "Monitor Controller $tag" `
-    --generate-notes
+    -Force
 
-Write-Host "Release $tag created successfully."
